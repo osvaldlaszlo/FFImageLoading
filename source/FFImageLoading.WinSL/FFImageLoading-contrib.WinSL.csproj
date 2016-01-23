@@ -230,6 +230,9 @@
     <Compile Include="..\FFImageLoading.Windows\Transformations\TransformationBase.cs">
       <Link>Tranformations\TransformationBase.cs</Link>
     </Compile>
+    <Compile Include="..\FFImageLoading.Windows\Transformations\TransformationExtensions.cs">
+      <Link>Tranformations\TransformationExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\FFImageLoading.Windows\Work\BitmapHolder.cs">
       <Link>Work\BitmapHolder.cs</Link>
     </Compile>

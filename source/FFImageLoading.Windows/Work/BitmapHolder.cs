@@ -1,12 +1,25 @@
-﻿using Windows.UI;
+﻿using FFImageLoading.Transformations;
+using System;
+using Windows.UI;
 
 namespace FFImageLoading.Work
 {
     public class BitmapHolder : IBitmap
     {
+        bool _optimizedBitmapHolder = false;
+
+        [Obsolete("Use new optimized constructor")]
         public BitmapHolder(int[] pixels, int width, int height)
         {
-            Pixels = pixels;
+            _pixels = pixels;
+            Width = width;
+            Height = height;
+        }
+
+        public BitmapHolder(byte[] pixels, int width, int height)
+        {
+            _optimizedBitmapHolder = true;
+            _pixelData = pixels;
             Width = width;
             Height = height;
         }
@@ -21,47 +34,56 @@ namespace FFImageLoading.Work
             get; private set; 
         }
 
-        public int[] Pixels { get; private set; }
+        int[] _pixels;
 
-        internal void SetPixels(int[] pixels, int width, int height)
+        [Obsolete("Use PixelData with its extension methods")]
+        public int[] Pixels
         {
-            Pixels = null;
-            Pixels = pixels;
-            Width = width;
-            Height = height;
+            get
+            {
+                if (_optimizedBitmapHolder)
+                    return _pixelData.ToIntPixelArray();
+
+                return _pixels;
+            }
+        }
+
+        byte[] _pixelData;
+
+        public byte[] PixelData
+        {
+            get
+            {
+                if (!_optimizedBitmapHolder)
+                    return _pixels.ToBytePixelArray();
+
+                return _pixelData;
+            }
         }
 
         public void SetPixel(int x, int y, int color)
         {
-            if (x < Width && y < Height)
-                Pixels[y * Width + x] = color;
+            if (_optimizedBitmapHolder)
+            {
+                PixelData.SetPixel(x, y, color);
+            }
+            else
+            {
+                if (x < Width && y < Height)
+                    _pixels[y * Width + x] = color;
+            }
         }
 
         public void SetPixel(int x, int y, Color color)
         {
-            SetPixel(x, y, ToInt(color));
+            SetPixel(x, y, color.ToInt());
         }
 
 		public void FreePixels()
 		{
-			Pixels = null;
+			_pixels = null;
+            _pixelData = null;
 		}
-
-        static int ToInt(Color color)
-        {
-            var col = 0;
-
-            if (color.A != 0)
-            {
-                var a = color.A + 1;
-                col = (color.A << 24)
-                  | ((byte)((color.R * a) >> 8) << 16)
-                  | ((byte)((color.G * a) >> 8) << 8)
-                  | ((byte)((color.B * a) >> 8));
-            }
-
-            return col;
-        }
     }
 
     public static class IBitmapExtensions

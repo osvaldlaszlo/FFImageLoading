@@ -101,6 +101,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskParameterExtensions.cs" />
     <Compile Include="Transformations\TransformationBase.cs" />
+    <Compile Include="Transformations\TransformationExtensions.cs" />
     <Compile Include="Work\BitmapHolder.cs" />
     <Compile Include="FFImage.cs" />
     <Compile Include="Work\ImageLoaderTask.cs" />

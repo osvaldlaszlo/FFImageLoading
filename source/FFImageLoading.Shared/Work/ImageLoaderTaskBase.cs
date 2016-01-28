@@ -18,6 +18,7 @@ namespace FFImageLoading.Work
 
 		private bool _clearCacheOnOutOfMemory;
 		private string _streamKey;
+		private bool _isDisposed;
 
 		protected ImageLoaderTaskBase(IMainThreadDispatcher mainThreadDispatcher, IMiniLogger miniLogger, TaskParameter parameters, bool clearCacheOnOutOfMemory)
 		{
@@ -34,8 +35,13 @@ namespace FFImageLoading.Work
 
 		public void Dispose()
 		{
-			Finish();
-		}
+			if (!_isDisposed)
+			{
+				Finish();
+				CancellationToken.Dispose();
+				_isDisposed = true;
+			}
+        }
 
 		#endregion
 
@@ -113,7 +119,11 @@ namespace FFImageLoading.Work
 		public void Cancel()
 		{
 			ImageService.RemovePendingTask(this);
-			CancellationToken.Cancel();
+
+			if (!_isDisposed)
+			{
+				CancellationToken.Cancel();
+			}
 			Finish();
 			Logger.Debug(string.Format("Canceled image generation for {0}", GetKey()));
 		}
@@ -122,7 +132,7 @@ namespace FFImageLoading.Work
 		{
 			get
 			{
-				return CancellationToken.IsCancellationRequested;
+				return _isDisposed || CancellationToken.IsCancellationRequested;
 			}
 		}
 
@@ -144,7 +154,7 @@ namespace FFImageLoading.Work
 		{
 			try
 			{
-				if (Completed || CancellationToken.IsCancellationRequested || ImageService.ExitTasksEarly)
+				if (Completed || IsCancelled || ImageService.ExitTasksEarly)
 					return;
 
 				GenerateResult generatingImageSucceeded = GenerateResult.Failed;
@@ -197,20 +207,23 @@ namespace FFImageLoading.Work
 				}
 				else
 				{
-					using (var stream = await Parameters.Stream(CancellationToken.Token).ConfigureAwait(false))
+					try
 					{
-						try 
+						using (var stream = await Parameters.Stream(CancellationToken.Token).ConfigureAwait(false))
 						{
 							generatingImageSucceeded = await LoadFromStreamAsync(stream).ConfigureAwait(false);
-						} 
-						catch (Exception ex2) 
-						{
-							Logger.Error("An error occured", ex2);
-							ex = ex2;
 						}
 					}
+					catch (TaskCanceledException)
+					{
+						generatingImageSucceeded = GenerateResult.Canceled;
+					}
+					catch (Exception ex2) 
+					{
+						Logger.Error("An error occured", ex2);
+						ex = ex2;
+					}
 				}
-
 
 				if (!IsCancelled && !Completed && generatingImageSucceeded == GenerateResult.Failed)
 				{

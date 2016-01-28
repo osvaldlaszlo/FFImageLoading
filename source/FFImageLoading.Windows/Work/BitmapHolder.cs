@@ -12,6 +12,7 @@ namespace FFImageLoading.Work
         public BitmapHolder(int[] pixels, int width, int height)
         {
             _pixels = pixels;
+
             Width = width;
             Height = height;
         }
@@ -20,6 +21,7 @@ namespace FFImageLoading.Work
         {
             _optimizedBitmapHolder = true;
             _pixelData = pixels;
+
             Width = width;
             Height = height;
         }
@@ -34,9 +36,9 @@ namespace FFImageLoading.Work
             get; private set; 
         }
 
-        int[] _pixels;
+        int[] _pixels = null;
 
-        [Obsolete("Use PixelData with its extension methods")]
+        [Obsolete("Use PixelData with its extension methods.")]
         public int[] Pixels
         {
             get
@@ -48,7 +50,7 @@ namespace FFImageLoading.Work
             }
         }
 
-        byte[] _pixelData;
+        byte[] _pixelData = null;
 
         public byte[] PixelData
         {

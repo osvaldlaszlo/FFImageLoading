@@ -37,14 +37,31 @@ namespace FFImageLoading.Transformations
 
         public static byte[] ToBytePixelArray(this int[] pixelArray)
         {
-            // TODO
-            return null;
+            byte[] result = new byte[pixelArray.Length * sizeof(int)];
+            Buffer.BlockCopy(pixelArray, 0, result, 0, result.Length);
+            return result;
         }
 
-        public static int[] ToIntPixelArray(this byte[] pixelArray)
+        public unsafe static int[] ToIntPixelArray(this byte[] pixelArray)
         {
-            // TODO
-            return null;
+            int length = pixelArray.Length / 4;
+            int[] pixels = new int[length];
+
+            fixed (byte* srcPtr = pixelArray)
+            {
+                fixed (int* dstPtr = pixels)
+                {
+                    for (var i = 0; i < length; i++)
+                    {
+                        dstPtr[i] = (srcPtr[i * 4 + 3] << 24)
+                                  | (srcPtr[i * 4 + 2] << 16)
+                                  | (srcPtr[i * 4 + 1] << 8)
+                                  | srcPtr[i * 4 + 0];
+                    }
+                }
+            }
+
+            return pixels;
         }
     }
 }

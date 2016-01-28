@@ -67,7 +67,8 @@ namespace FFImageLoading.Work
         {
             if (_optimizedBitmapHolder)
             {
-                PixelData.SetPixel(x, y, color);
+                int pixelPos = (y * Width + x);
+                PixelData.SetPixel(pixelPos, color);
             }
             else
             {

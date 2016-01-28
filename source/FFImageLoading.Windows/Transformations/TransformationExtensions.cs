@@ -25,14 +25,20 @@ namespace FFImageLoading.Transformations
             return col;
         }
 
-        public static void SetPixel(this byte[] pixelData, int x, int y, int color)
+        public static unsafe void SetPixel(this byte[] pixelData, int pixelPosition, int color)
         {
-            //TODO
+            byte* bytes = (byte*)&color;
+
+            pixelData[pixelPosition * 4] = bytes[0];
+            pixelData[pixelPosition * 4 + 1] = bytes[1];
+            pixelData[pixelPosition * 4 + 2] = bytes[2];
+            pixelData[pixelPosition * 4 + 3] = bytes[3];
         }
 
-        public static void SetPixel(this byte[] pixelData, int x, int y, Color color)
+
+        public static void SetPixel(this byte[] pixelData, int pixelPosition, Color color)
         {
-            pixelData.SetPixel(x, y, color.ToInt());
+            pixelData.SetPixel(pixelPosition, color.ToInt());
         }
 
         public static byte[] ToBytePixelArray(this int[] pixelArray)

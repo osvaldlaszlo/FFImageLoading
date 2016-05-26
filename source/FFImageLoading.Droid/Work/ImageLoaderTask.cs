@@ -164,7 +164,7 @@ namespace FFImageLoading.Work
 		{
 			try
 			{
-				if (!_target.IsTaskValid(this))
+				if (!_target.IsValid)
 					return CacheResult.NotFound; // weird situation, dunno what to do
 
 				if (IsCancelled)
@@ -320,19 +320,7 @@ namespace FFImageLoading.Work
 			{
 				try
 				{
-// NOTE: CURRENTLY NOT NEEDED							
-//							if (streamWithResult.Result == LoadingResult.Internet)
-//							{
-//								// When loading from internet stream we shouldn't block otherwise other downloads will be paused
-//								BitmapFactory.DecodeStream(stream, null, options);
-//							}
-//							else
-//							{
-						lock (_decodingLock)
-						{
-							BitmapFactory.DecodeStream(stream, null, options);
-						}
-//							}
+					BitmapFactory.DecodeStream(stream, null, options);
 
 					if (!stream.CanSeek)
 					{
@@ -434,19 +422,7 @@ namespace FFImageLoading.Work
 				Bitmap bitmap;
 				try
 				{
-// NOTE: CURRENTLY NOT NEEDED
-//							if (streamWithResult.Result == LoadingResult.Internet)
-//							{
-//								// When loading from internet stream we shouldn't block otherwise other downloads will be paused
-//								bitmap = BitmapFactory.DecodeStream(stream, null, options);
-//							}
-//							else
-//							{
-						lock (_decodingLock)
-						{
-							bitmap = BitmapFactory.DecodeStream(stream, null, options);
-						}
-//							}
+					bitmap = BitmapFactory.DecodeStream(stream, null, options);
 				}
 				catch (Java.Lang.Throwable vme)
 				{
@@ -578,6 +554,8 @@ namespace FFImageLoading.Work
 			{
 				// We should wrap drawable in an AsyncDrawable, nothing is deferred
 				drawable = new SelfDisposingAsyncDrawable(Context.Resources, drawable.Bitmap, this);
+
+				await MainThreadDispatcher.PostAsync(() => _target.Set(this, drawable, isLocalOrFromCache, isLoadingPlaceholder)).ConfigureAwait(false);
 			}
 			else
 			{
@@ -601,12 +579,8 @@ namespace FFImageLoading.Work
 			if (drawable == null)
 				return false;
 
-			_loadingPlaceholderWeakReference = new WeakReference<BitmapDrawable>(drawable);
-
-			if (IsCancelled)
-				return false;
-
-			await MainThreadDispatcher.PostAsync(() => _target.Set(this, drawable, isLocalOrFromCache, isLoadingPlaceholder)).ConfigureAwait(false);
+			if (isLoadingPlaceholder)
+				_loadingPlaceholderWeakReference = new WeakReference<BitmapDrawable>(drawable);
 
 			return true;
 		}

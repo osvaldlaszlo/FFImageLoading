@@ -1,14 +1,13 @@
-﻿using FFImageLoading.Work;
+﻿using FFImageLoading.Extensions;
+using FFImageLoading.Work;
 
 namespace FFImageLoading.Transformations
 {
     public class CropTransformation : TransformationBase
     {
-        private double _zoomFactor;
-        private double _xOffset;
-        private double _yOffset;
-        private double _cropWidthRatio;
-        private double _cropHeightRatio;
+		public CropTransformation() : this(1d, 0d, 0d)
+		{
+		}
 
         public CropTransformation(double zoomFactor, double xOffset, double yOffset) : this(zoomFactor, xOffset, yOffset, 1f, 1f)
         {
@@ -16,28 +15,34 @@ namespace FFImageLoading.Transformations
 
         public CropTransformation(double zoomFactor, double xOffset, double yOffset, double cropWidthRatio, double cropHeightRatio)
         {
-            _zoomFactor = zoomFactor;
-            _xOffset = xOffset;
-            _yOffset = yOffset;
-            _cropWidthRatio = cropWidthRatio;
-            _cropHeightRatio = cropHeightRatio;
+			ZoomFactor = zoomFactor;
+			XOffset = xOffset;
+			YOffset = yOffset;
+			CropWidthRatio = cropWidthRatio;
+			CropHeightRatio = cropHeightRatio;
 
-            if (zoomFactor < 1f)
-                _zoomFactor = 1f;
+			if (ZoomFactor < 1f)
+				ZoomFactor = 1f;
         }
 
-        public override string Key
-        {
-            get
-            {
-                return string.Format("CropTransformation,zoomFactor={0},xOffset={1},yOffset={2},cropWidthRatio={3},cropHeightRatio={4}",
-              _zoomFactor, _xOffset, _yOffset, _cropWidthRatio, _cropHeightRatio);
-            }
-        }
+		public double ZoomFactor { get; set; }
+		public double XOffset { get; set; }
+		public double YOffset { get; set; }
+		public double CropWidthRatio { get; set; }
+		public double CropHeightRatio { get; set; }
+
+		public override string Key
+		{
+			get
+			{
+				return string.Format("CropTransformation,zoomFactor={0},xOffset={1},yOffset={2},cropWidthRatio={3},cropHeightRatio={4}",
+				ZoomFactor, XOffset, YOffset, CropWidthRatio, CropHeightRatio);
+			}
+		}
 
         protected override BitmapHolder Transform(BitmapHolder source)
         {
-            return ToCropped(source, _zoomFactor, _xOffset, _yOffset, _cropWidthRatio, _cropHeightRatio);
+            return ToCropped(source, ZoomFactor, XOffset, YOffset, CropWidthRatio, CropHeightRatio);
         }
 
         public static BitmapHolder ToCropped(BitmapHolder source, double zoomFactor, double xOffset, double yOffset, double cropWidthRatio, double cropHeightRatio)
@@ -85,9 +90,9 @@ namespace FFImageLoading.Transformations
 
             for (var line = 0; line < height; line++)
             {
-                var srcOff = (((int)cropY + line) * source.Width + (int)cropX) * Helpers.SizeOfArgb;
-                var dstOff = line * width * Helpers.SizeOfArgb;
-                Helpers.BlockCopy(source.Pixels, srcOff, result, dstOff, width * Helpers.SizeOfArgb);
+                var srcOff = (((int)cropY + line) * source.Width + (int)cropX) * ColorExtensions.SizeOfArgb;
+                var dstOff = line * width * ColorExtensions.SizeOfArgb;
+                Helpers.BlockCopy(source.Pixels, srcOff, result, dstOff, width * ColorExtensions.SizeOfArgb);
             }
 
             return new BitmapHolder(result, width, height);
@@ -109,9 +114,9 @@ namespace FFImageLoading.Transformations
 
             for (var line = 0; line < height; line++)
             {
-                var srcOff = ((y + line) * srcWidth + x) * Helpers.SizeOfArgb;
-                var dstOff = line * width * Helpers.SizeOfArgb;
-                Helpers.BlockCopy(source.Pixels, srcOff, result, dstOff, width * Helpers.SizeOfArgb);
+                var srcOff = ((y + line) * srcWidth + x) * ColorExtensions.SizeOfArgb;
+                var dstOff = line * width * ColorExtensions.SizeOfArgb;
+                Helpers.BlockCopy(source.Pixels, srcOff, result, dstOff, width * ColorExtensions.SizeOfArgb);
             }
 
             return new BitmapHolder(result, width, height);

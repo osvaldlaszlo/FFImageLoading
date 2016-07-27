@@ -14,9 +14,7 @@ namespace FFImageLoading.Work
 	public class ImageLoaderTask : ImageLoaderTaskBase
 	{
 		internal readonly ITarget<UIImage, ImageLoaderTask> _target;
-		private readonly nfloat _imageScale;
-		// private static readonly object _imageInLock = new object();
-
+		
 		static ImageLoaderTask()
 		{
 			// do not remove!
@@ -26,14 +24,13 @@ namespace FFImageLoading.Work
 			#pragma warning restore 0219
 		}
 
-		public ImageLoaderTask(IDownloadCache downloadCache, IMainThreadDispatcher mainThreadDispatcher, IMiniLogger miniLogger, TaskParameter parameters, nfloat imageScale, ITarget<UIImage, ImageLoaderTask> target)
-			: base(mainThreadDispatcher, miniLogger, parameters, true)
+		public ImageLoaderTask(IDownloadCache downloadCache, IMainThreadDispatcher mainThreadDispatcher, IMiniLogger miniLogger, TaskParameter parameters, nfloat imageScale, ITarget<UIImage, ImageLoaderTask> target, bool clearCacheOnOutOfMemory)
+			: base(mainThreadDispatcher, miniLogger, parameters, true, clearCacheOnOutOfMemory)
 		{
 			if (target == null)
 				throw new ArgumentNullException(nameof(target));
 			
 			_target = target;
-			_imageScale = imageScale;
 			DownloadCache = downloadCache;
 		}
 
@@ -361,7 +358,7 @@ namespace FFImageLoading.Work
 					downsampleHeight = downsampleHeight.PointsToPixels();
 				}
 
-				imageIn = nsdata.ToImage(new CoreGraphics.CGSize(downsampleWidth, downsampleHeight), _imageScale, NSDataExtensions.RCTResizeMode.ScaleAspectFill, imageInformation);
+				imageIn = nsdata.ToImage(new CoreGraphics.CGSize(downsampleWidth, downsampleHeight), ScaleHelper.Scale, NSDataExtensions.RCTResizeMode.ScaleAspectFill, imageInformation);
 			}
 			else if (Parameters.DownSampleSize != null && imageIn != null)
 			{

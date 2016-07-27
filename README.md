@@ -1,3 +1,5 @@
+*We are actively looking for persons that could help maintaining the project. If you are interested just let us know!*
+
 # FFImageLoading - Fast & Furious Image Loading [![AppVeyor][ci-img]][ci-link]
 
 Library to load images quickly & easily on Xamarin.iOS, Xamarin.Android, Xamarin.Forms and Windows (WinRT, UWP, Silverlight).
@@ -7,7 +9,7 @@ Library to load images quickly & easily on Xamarin.iOS, Xamarin.Android, Xamarin
 |         Xamarin iOS / Android         |             Xamarin.Forms             |         Windows RT / UWP          |          Transformations          |
 |:-------------------------------------:|:-------------------------------------:|:---------------------------------:|:---------------------------------:|
 |    [![NuGet][ffil-img]][ffil-link]    |   [![NuGet][forms-img]][forms-link]   |  [![NuGet][ffil-img]][ffil-link]  | [![NuGet][trans-img]][trans-link] |
-| [![][demo-droid-img]][demo-droid-src] | [![][demo-forms-img]][demo-forms-src] | [![][demo-win-img]][demo-win-src] |                 -                 |
+| [![][demo-droid-img]][demo-droid-src] | [![][demo-forms-img]][demo-forms-src] | [![][demo-win-img]][demo-win-src] | [![][dev-nugets-img]][dev-nugets]                 |
 
 [![NuGet][ffimageloading]][ffimageloading_large]
 
@@ -27,42 +29,26 @@ Library to load images quickly & easily on Xamarin.iOS, Xamarin.Android, Xamarin
 - Transformations support
   - BlurredTransformation
   - CircleTransformation, RoundedTransformation, CornersTransformation, CropTransformation
-  - ColorSpaceTransformation, GrayscaleTransformation, SepiaTransformation
+  - ColorSpaceTransformation, GrayscaleTransformation, SepiaTransformation, TintTransformation
   - FlipTransformation, RotateTransformation
   - Supports custom transformations (native platform `ITransformation` implementations)
 
 ## Documentation
 
-- **General**
-  - [Fluent Syntax](https://github.com/molinch/FFImageLoading/wiki/Fluent-Syntax)
-
-- **Android, iOS, Windows Phone**
-  - [Common API](https://github.com/molinch/FFImageLoading/wiki/API)
-  - [Android Specificities](https://github.com/molinch/FFImageLoading/wiki/Android-API)
-  - [iOS Specificities](https://github.com/molinch/FFImageLoading/wiki/iOS-API)
-  - [Windows Specificities](https://github.com/molinch/FFImageLoading/wiki/Windows-API)
-  - [Advanced usage](https://github.com/molinch/FFImageLoading/wiki/Advanced-Usage)
-
-- **Xamarin.Forms**
-  - [Xamarin.Forms API](https://github.com/molinch/FFImageLoading/wiki/Xamarin.Forms-API)
-  - [Xamarin.Forms Advanced](https://github.com/molinch/FFImageLoading/wiki/Xamarin.Forms-Advanced)
-
-- **Transformations**
-  - [Transformations Guide](https://github.com/molinch/FFImageLoading/wiki/Transformations-Guide)
-  - [Custom Transformations Guide](https://github.com/molinch/FFImageLoading/wiki/Custom-Transformations-Guide)
+https://github.com/luberda-molinet/FFImageLoading/wiki
 
 [what-is-this]: various_images_and_image_links
 
-[ci-img]: https://img.shields.io/appveyor/ci/molinch/ffimageloading.svg?maxAge=2592000
+[ci-img]: https://img.shields.io/appveyor/ci/molinch/ffimageloading.svg
 [ci-link]: https://ci.appveyor.com/project/molinch/ffimageloading
 
-[ffil-img]: https://img.shields.io/nuget/v/Xamarin.FFImageLoading.svg?maxAge=2592000
+[ffil-img]: https://img.shields.io/nuget/v/Xamarin.FFImageLoading.svg
 [ffil-link]: https://www.nuget.org/packages/Xamarin.FFImageLoading
-[forms-img]: https://img.shields.io/nuget/v/Xamarin.FFImageLoading.Forms.svg?maxAge=2592000
+[forms-img]: https://img.shields.io/nuget/v/Xamarin.FFImageLoading.Forms.svg
 [forms-link]: https://www.nuget.org/packages/Xamarin.FFImageLoading.Forms
-[trans-img]: https://img.shields.io/nuget/v/Xamarin.FFImageLoading.Transformations.svg?maxAge=2592000
+[trans-img]: https://img.shields.io/nuget/v/Xamarin.FFImageLoading.Transformations.svg
 [trans-link]: https://www.nuget.org/packages/Xamarin.FFImageLoading.Transformations
-[ffil-pre-img]: https://img.shields.io/nuget/vpre/Xamarin.FFImageLoading.svg?maxAge=2592000
+[ffil-pre-img]: https://img.shields.io/nuget/vpre/Xamarin.FFImageLoading.svg
 [ffil-pre-link]: https://www.nuget.org/packages/Xamarin.FFImageLoading
 
 [ffimageloading_large]: https://raw.githubusercontent.com/molinch/FFImageLoading/master/samples/Screenshots/ffimageloading_large.png
@@ -74,4 +60,6 @@ Library to load images quickly & easily on Xamarin.iOS, Xamarin.Android, Xamarin
 [demo-droid-src]: https://github.com/molinch/FFImageLoading/tree/master/samples/ImageLoading.Sample
 [demo-win-img]: https://img.shields.io/badge/demo-source-orange.svg
 [demo-win-src]: https://github.com/molinch/FFImageLoading/tree/master/samples/Simple.WinPhone.Sample
+[dev-nugets-img]: https://img.shields.io/badge/nugets-dev-yellow.svg
+[dev-nugets]: https://github.com/luberda-molinet/FFImageLoading/wiki/Dev-NuGet-packages
 

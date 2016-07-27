@@ -190,9 +190,6 @@
     <Compile Include="..\FFImageLoading.Windows\Args\SuccessEventArgs.cs">
       <Link>Args\SuccessEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\FFImageLoading.Windows\Cache\DiskCache.cs">
-      <Link>Cache\DiskCache.cs</Link>
-    </Compile>
     <Compile Include="..\FFImageLoading.Windows\Cache\ICacheKeyFactory.cs">
       <Link>Cache\ICacheKeyFactory.cs</Link>
     </Compile>
@@ -223,6 +220,9 @@
     <Compile Include="..\FFImageLoading.Windows\DataResolver\UrlDataResolver.cs">
       <Link>DataResolver\UrlDataResolver.cs</Link>
     </Compile>
+    <Compile Include="..\FFImageLoading.Windows\Extensions\ColorExtensions.cs">
+      <Link>Extensions\ColorExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\FFImageLoading.Windows\FFImage.cs">
       <Link>FFImage.cs</Link>
     </Compile>
@@ -250,14 +250,9 @@
     <Compile Include="..\FFImageLoading.Windows\Work\ImageTarget.cs">
       <Link>Work\ImageTarget.cs</Link>
     </Compile>
-    <Compile Include="Concurrency\ConcurrentDictionary.cs" />
-    <Compile Include="Concurrency\ConcurrentHashtable.cs" />
-    <Compile Include="Concurrency\Hasher.cs" />
-    <Compile Include="Concurrency\Segment.cs" />
-    <Compile Include="Concurrency\Segmentrange.cs" />
-    <Compile Include="Concurrency\TinyReaderWriterLock.cs" />
     <Compile Include="Extensions\ImageExtensions.cs" />
     <Compile Include="Extensions\UnitsExtensions.cs" />
+    <Compile Include="Helpers\PlatformPerformance.cs" />
     <Compile Include="Helpers\RandomStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -3,9 +3,11 @@ using Xamarin.Forms;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Foundation;
 
 namespace FFImageLoading.Forms.Touch
 {
+	[Preserve(AllMembers= true)]
 	internal class ImageSourceBinding
 	{
 		public ImageSourceBinding(FFImageLoading.Work.ImageSource imageSource, string path)
@@ -36,13 +38,20 @@ namespace FFImageLoading.Forms.Touch
 			var uriImageSource = source as UriImageSource;
 			if (uriImageSource != null)
 			{
-				return new ImageSourceBinding(FFImageLoading.Work.ImageSource.Url, uriImageSource.Uri.ToString());
+				var uri = uriImageSource.Uri?.ToString();
+				if (string.IsNullOrWhiteSpace(uri))
+					return null;
+
+				return new ImageSourceBinding(FFImageLoading.Work.ImageSource.Url, uri);
 			}
 
 			var fileImageSource = source as FileImageSource;
 			if (fileImageSource != null)
 			{
-				if (File.Exists(fileImageSource.File))
+				if (string.IsNullOrWhiteSpace(fileImageSource.File))
+					return null;
+				
+				if (File.Exists(fileImageSource.File) && Directory.Exists(fileImageSource.File))
 					return new ImageSourceBinding(FFImageLoading.Work.ImageSource.Filepath, fileImageSource.File);
 				
 				return new ImageSourceBinding(FFImageLoading.Work.ImageSource.CompiledResource, fileImageSource.File);

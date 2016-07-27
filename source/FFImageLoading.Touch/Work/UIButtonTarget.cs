@@ -5,7 +5,7 @@ using UIKit;
 
 namespace FFImageLoading.Work
 {
-	public class UIButtonTarget: UIViewTarget<UIButton>
+	public class UIButtonTarget: UIControlTarget<UIButton>
 	{
 		public UIButtonTarget(UIButton control) : base(control)
 		{
@@ -18,6 +18,15 @@ namespace FFImageLoading.Work
 				return;
 			control.SetImage(image, UIControlState.Normal);
 		}
+
+        public override void SetAsEmpty()
+        {
+            var control = Control;
+            if (control == null)
+                return;
+
+            control.SetImage(null, UIControlState.Normal);
+        }
 	}
 }
 

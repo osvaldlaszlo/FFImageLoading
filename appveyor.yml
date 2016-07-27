@@ -1,4 +1,3 @@
-version: '{build}'
 os: Visual Studio 2015
 configuration: Release
 platform: Any CPU
@@ -18,6 +17,44 @@ build_script:
  - cmd: mklink /j %ANDROID_HOME% "C:\Program Files (x86)\Android\android-sdk"
  - cmd: echo y | "%ANDROID_HOME%\tools\android.bat" update sdk --no-ui --all --filter platform-tools,tools,android-23,android-19
  - cmd: .\MakefileAll.bat
+  
+before_build:
+- ps: >-
+    $nuspec1 = "source\Xamarin.FFImageLoading.nuspec"
+    
+    $nuspec2 = "source\Xamarin.FFImageLoading.Forms.nuspec"
+    
+    $nuspec3 = "source\Xamarin.FFImageLoading.Transformations.nuspec"
+    
+    $nuspec1template = "source\Xamarin.FFImageLoading.nuspec.template"
+    
+    $nuspec2template = "source\Xamarin.FFImageLoading.Forms.nuspec.template"
+    
+    $nuspec3template = "source\Xamarin.FFImageLoading.Transformations.nuspec.template" 
+
+    $version = $env:appveyor_build_version
+    
+    $branch = $env:appveyor_repo_branch 
+    
+    $baseversion = $version.SubString(0, $version.LastIndexOf("."))
+
+    If ($env:appveyor_repo_tag -ine "true") {
+        
+        $version = ("{0}-pre-{1}" -f $baseversion, $env:appveyor_build_number)
+    }
+    Else {
+        $version = $baseversion    
+    }
+    
+    If ($branch -ine "master") {
+        $version = ("{0}-{1}" -f $version, $branch)
+    }
+          
+    (Get-Content $nuspec1template).replace('@version', $version) | Set-Content $nuspec1
+    
+    (Get-Content $nuspec2template).replace('@version', $version) | Set-Content $nuspec2    
+    
+    (Get-Content $nuspec3template).replace('@version', $version) | Set-Content $nuspec3
   
 artifacts:
  - path: Xamarin.FFImageLoading.*.nupkg

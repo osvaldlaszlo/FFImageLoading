@@ -63,6 +63,11 @@ namespace FFImageLoading
 		/// <param name="parameters">Image parameters.</param>
 		public static void Preload(this TaskParameter parameters)
 		{
+            if (parameters.Priority == null)
+            {
+                parameters.WithPriority(LoadingPriority.Low);
+            }
+
             parameters.Preload = true;
             var target = new Target<WriteableBitmap, ImageLoaderTask>();
             var task = CreateTask(parameters, target);
@@ -71,6 +76,13 @@ namespace FFImageLoading
 
         private static IScheduledWork Into(this TaskParameter parameters, ITarget<WriteableBitmap, ImageLoaderTask> target)
         {
+            if (parameters.Source != ImageSource.Stream && string.IsNullOrWhiteSpace(parameters.Path))
+            {
+                target.SetAsEmpty();
+                parameters.Dispose();
+                return null;
+            }
+
             var task = CreateTask(parameters, target);
             ImageService.Instance.LoadImage(task);
             return task;
@@ -99,7 +111,7 @@ namespace FFImageLoading
 
         private static ImageLoaderTask CreateTask(this TaskParameter parameters, ITarget<WriteableBitmap, ImageLoaderTask> target)
         {
-            return new ImageLoaderTask(ImageService.Instance.Config.DownloadCache, new MainThreadDispatcher(), ImageService.Instance.Config.Logger, parameters, target);
+            return new ImageLoaderTask(ImageService.Instance.Config.DownloadCache, MainThreadDispatcher.Instance, ImageService.Instance.Config.Logger, parameters, target, ImageService.Instance.Config.VerboseLoadingCancelledLogging);
         }
     }
 }

@@ -25,6 +25,18 @@ namespace FFImageLoading
         }
 
         /// <summary>
+        /// Loads the image into given imageView using defined parameters.
+        /// </summary>
+        /// <param name="parameters">Parameters for loading the image.</param>
+        /// <param name="imageView">Image view that should receive the image.</param>
+        /// <param name="imageScale">Optional scale factor to use when interpreting the image data. If unspecified it will use the device scale (ie: Retina = 2, non retina = 1)</param>
+        public static IScheduledWork Into(this TaskParameter parameters, UITabBarItem item, float imageScale = -1f)
+        {
+            var target = new UIBarItemTarget(item);
+            return parameters.Into(imageScale, target);
+        }
+
+        /// <summary>
         /// Loads the image into given UIButton using defined parameters.
         /// </summary>
         /// <param name="parameters">Parameters for loading the image.</param>
@@ -81,6 +93,11 @@ namespace FFImageLoading
 		/// <param name="parameters">Image parameters.</param>
 		public static void Preload(this TaskParameter parameters)
 		{
+            if (parameters.Priority == null)
+            {
+                parameters.WithPriority(LoadingPriority.Low);
+            }
+
 			parameters.Preload = true;
 			var target = new Target<UIImage, ImageLoaderTask>();
 			var task = CreateTask(parameters, 1, target);
@@ -89,11 +106,18 @@ namespace FFImageLoading
 
 		private static ImageLoaderTask CreateTask(this TaskParameter parameters, float imageScale, ITarget<UIImage, ImageLoaderTask> target)
 		{
-			return new ImageLoaderTask(ImageService.Instance.Config.DownloadCache, new MainThreadDispatcher(), ImageService.Instance.Config.Logger, parameters, imageScale, target);
+            return new ImageLoaderTask(ImageService.Instance.Config.DownloadCache, MainThreadDispatcher.Instance, ImageService.Instance.Config.Logger, parameters, imageScale, target, ImageService.Instance.Config.VerboseLoadingCancelledLogging);
 		}
 
 		private static IScheduledWork Into(this TaskParameter parameters, float imageScale, ITarget<UIImage, ImageLoaderTask> target)
         {
+            if (parameters.Source != ImageSource.Stream && string.IsNullOrWhiteSpace(parameters.Path))
+            {
+                target.SetAsEmpty();
+                parameters.Dispose();
+                return null;
+            }
+
 			var task = CreateTask(parameters, imageScale, target);
 			ImageService.Instance.LoadImage(task);
             return task;

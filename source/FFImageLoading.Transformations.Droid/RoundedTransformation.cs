@@ -1,16 +1,15 @@
 ﻿using System;
 using Android.Graphics;
+using Android.Runtime;
 
 namespace FFImageLoading.Transformations
 {
+	[Preserve(AllMembers = true)]
 	public class RoundedTransformation : TransformationBase
 	{
-		private double _radius;
-		private double _cropWidthRatio;
-		private double _cropHeightRatio;
-
-		private double _borderSize;
-		private string _borderHexColor;
+		public RoundedTransformation() : this(30d)
+		{
+		}
 
 		public RoundedTransformation(double radius) : this(radius, 1d, 1d)
 		{
@@ -22,22 +21,31 @@ namespace FFImageLoading.Transformations
 
 		public RoundedTransformation(double radius, double cropWidthRatio, double cropHeightRatio, double borderSize, string borderHexColor)
 		{
-			_radius = radius;
-			_cropWidthRatio = cropWidthRatio;
-			_cropHeightRatio = cropHeightRatio;
-			_borderSize = borderSize;
-			_borderHexColor = borderHexColor;
+			Radius = radius;
+			CropWidthRatio = cropWidthRatio;
+			CropHeightRatio = cropHeightRatio;
+			BorderSize = borderSize;
+			BorderHexColor = borderHexColor;
 		}
+
+		public double Radius { get; set; }
+		public double CropWidthRatio { get; set; }
+		public double CropHeightRatio { get; set; }
+		public double BorderSize { get; set; }
+		public string BorderHexColor { get; set; }
 
 		public override string Key
 		{
-			get { return string.Format("RoundedTransformation,radius={0},cropWidthRatio={1},cropHeightRatio={2},borderSize={3},borderHexColor={4}", 
-				_radius, _cropWidthRatio, _cropHeightRatio, _borderSize, _borderHexColor); }
+			get 
+			{ 
+				return string.Format("RoundedTransformation,radius={0},cropWidthRatio={1},cropHeightRatio={2},borderSize={3},borderHexColor={4}", 
+				Radius, CropWidthRatio, CropHeightRatio, BorderSize, BorderHexColor); 
+			}
 		}
 			
 		protected override Bitmap Transform(Bitmap source)
 		{
-			return ToRounded(source, (float)_radius, _cropWidthRatio, _cropHeightRatio, _borderSize, _borderHexColor);
+			return ToRounded(source, (float)Radius, CropWidthRatio, CropHeightRatio, BorderSize, BorderHexColor);
 		}
 
 		public static Bitmap ToRounded(Bitmap source, float rad, double cropWidthRatio, double cropHeightRatio, double borderSize, string borderHexColor)
@@ -86,19 +94,7 @@ namespace FFImageLoading.Transformations
 				if (borderSize > 0d) 
 				{
 					borderSize = (borderSize * (desiredWidth + desiredHeight) / 2d / 500d);
-					Color borderColor = Color.Transparent;
-
-					try
-					{
-						if(!borderHexColor.StartsWith("#", StringComparison.Ordinal))
-							borderHexColor.Insert(0, "#");
-						borderColor = Color.ParseColor(borderHexColor);
-					}
-					catch(Exception)
-					{
-					}
-
-					paint.Color = borderColor;
+					paint.Color = borderHexColor.ToColor(); ;
 					paint.SetStyle(Paint.Style.Stroke);
 					paint.StrokeWidth = (float)borderSize;
 					paint.SetShader(null);

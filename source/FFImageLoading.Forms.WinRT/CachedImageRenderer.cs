@@ -10,6 +10,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Storage.Streams;
 using System.IO;
 using System.Threading;
+using System.Reflection;
+using System.Linq;
 
 #if WINDOWS_UWP
 using FFImageLoading.Forms.WinUWP;
@@ -152,8 +154,34 @@ namespace FFImageLoading.Forms.WinRT
         {
             if (measured)
             {
-                ((Xamarin.Forms.IVisualElementController)Element).NativeSizeChanged();
+                HackInvalidateMeasure(Element);
             }
+        }
+
+        void HackInvalidateMeasure(object elCtrl)
+        {
+            var obj = elCtrl;
+#if !SILVERLIGHT
+            // HACK FOR https://bugzilla.xamarin.com/show_bug.cgi?id=41087
+
+            var ti = obj.GetType().GetTypeInfo();
+            var found = obj.GetType().GetRuntimeMethods()
+                .FirstOrDefault(v => v.Name.EndsWith("InvalidateMeasure") && v.GetParameters().Count() == 1);
+            
+            if (found != null)
+            {
+                var paramType = found.GetParameters().First().ParameterType;
+                var enumValues = Enum.GetValues(paramType);
+                found.Invoke(obj, new[] { enumValues.GetValue(5) });
+            }
+            else
+            {
+                ((Xamarin.Forms.IVisualElementController)obj).NativeSizeChanged();
+            }
+            // END OF HACK
+#else
+            ((Xamarin.Forms.IVisualElementController)obj).NativeSizeChanged();
+#endif
         }
 
         private async void UpdateSource()
@@ -312,6 +340,18 @@ namespace FFImageLoading.Forms.WinRT
 
         private void UpdateAspect()
         {
+            if (Element.Aspect == Xamarin.Forms.Aspect.AspectFill
+                && Control.HorizontalAlignment != HorizontalAlignment.Center) // Then Center Crop
+            {
+                Control.HorizontalAlignment = HorizontalAlignment.Center;
+                Control.VerticalAlignment = VerticalAlignment.Center;
+            }
+            else if (Control.HorizontalAlignment != HorizontalAlignment.Left) // Default
+            {
+                Control.HorizontalAlignment = HorizontalAlignment.Left;
+                Control.VerticalAlignment = VerticalAlignment.Top;
+            }
+
             Control.Stretch = GetStretch(Element.Aspect);
         }
 
@@ -332,9 +372,10 @@ namespace FFImageLoading.Forms.WinRT
         {
             if (element != null)
             {
-                ((Xamarin.Forms.IElementController)element).SetValueFromRenderer(CachedImage.IsLoadingPropertyKey, false);
-                ((Xamarin.Forms.IVisualElementController)element).NativeSizeChanged();
-                element.InvalidateViewMeasure();
+                var elCtrl = (Xamarin.Forms.IVisualElementController)Element;
+                elCtrl.SetValueFromRenderer(CachedImage.IsLoadingPropertyKey, false);
+                //elCtrl.NativeSizeChanged();
+                HackInvalidateMeasure(Element);
             }
         }
 

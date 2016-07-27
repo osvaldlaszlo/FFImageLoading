@@ -1,6 +1,6 @@
 ﻿using System;
-using Xamarin.Forms;
 using System.Globalization;
+using Xamarin.Forms;
 
 namespace FFImageLoading.Forms
 {
@@ -13,27 +13,15 @@ namespace FFImageLoading.Forms
 
 		public override object ConvertFrom(CultureInfo culture, object value)
 		{
-			if (value == null)
+			var text = value as string;
+
+			if (text != null)
 			{
-				return null;
+				Uri uri;
+				return Uri.TryCreate(text, UriKind.Absolute, out uri) && uri.Scheme != "file" ? ImageSource.FromUri(uri) : ImageSource.FromFile(text);
 			}
 
-			string text = value as string;
-			if (text == null)
-			{
-				throw new InvalidOperationException(string.Format("Cannot convert {0} into {1}", new object[] {
-					value,
-					typeof(ImageSource)
-				}));
-			}
-
-			Uri uri;
-			if (!Uri.TryCreate(text, UriKind.Absolute, out uri) || uri.Scheme == "file")
-			{
-				return ImageSource.FromFile(text);
-			}
-
-			return ImageSource.FromUri(uri);
+			throw new InvalidOperationException(string.Format("Cannot convert \"{0}\" into {1}", value, typeof(ImageSource)));
 		}
 	}
 }

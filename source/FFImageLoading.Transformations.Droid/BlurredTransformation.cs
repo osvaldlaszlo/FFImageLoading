@@ -1,28 +1,36 @@
 ﻿using System;
 using Android.Graphics;
 using Android.Content;
+using Android.Runtime;
 
 namespace FFImageLoading.Transformations
 {
+	[Preserve(AllMembers = true)]
 	public class BlurredTransformation: TransformationBase
 	{
-		private double _radius;
 		private Context _context;
+
+		public BlurredTransformation()
+		{
+			Radius = 20d;
+		}
 
 		public BlurredTransformation(double radius)
 		{
-			_radius = radius;
+			Radius = radius;
 			_context = Android.App.Application.Context;
 		}
 
+		public double Radius { get; set; }
+
 		public override string Key
 		{
-			get { return string.Format("BlurredTransformation,radius={0}", _radius); }
+			get { return string.Format("BlurredTransformation,radius={0}", Radius); }
 		}
 
 		protected override Bitmap Transform(Bitmap source)
 		{
-			return ToBlurred(source, _context, (float)_radius);
+			return ToBlurred(source, _context, (float)Radius);
 		}
 
 		public static Bitmap ToBlurred(Bitmap source, Context context, float radius)
@@ -59,7 +67,11 @@ namespace FFImageLoading.Transformations
 		// Source: http://incubator.quasimondo.com/processing/superfast_blur.php
 		public static Bitmap ToLegacyBlurred(Bitmap source, Context context, int radius)
 		{
-			Bitmap img = source.Copy(source.GetConfig(), true);
+			var config = source.GetConfig();
+			if (config == null)
+				config = Bitmap.Config.Argb8888;    // This will support transparency
+
+			Bitmap img = source.Copy(config, true);
 
 			int w = img.Width;
 			int h = img.Height;

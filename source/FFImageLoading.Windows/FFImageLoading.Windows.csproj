@@ -36,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\FFImageLoading.Platform.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows Debug|AnyCPU'">
     <OutputPath>bin\Debug\</OutputPath>
@@ -79,7 +80,6 @@
     <Compile Include="Args\GetImageAsJpgArgs.cs" />
     <Compile Include="Args\GetImageAsPngArgs.cs" />
     <Compile Include="Args\SuccessEventArgs.cs" />
-    <Compile Include="Cache\DiskCache.cs" />
     <Compile Include="Cache\IImageCache.cs" />
     <Compile Include="Cache\ImageCache.cs" />
     <Compile Include="Cache\SimpleDiskCache.cs" />
@@ -89,6 +89,7 @@
     <Compile Include="DataResolver\ResolverImageData.cs" />
     <Compile Include="DataResolver\ResourceDataResolver.cs" />
     <Compile Include="DataResolver\UrlDataResolver.cs" />
+    <Compile Include="Extensions\ColorExtensions.cs" />
     <Compile Include="Extensions\ImageExtensions.cs" />
     <Compile Include="Extensions\UnitsExtensions.cs" />
     <Compile Include="FFImageSourceBinding.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Work\ImageLoaderTask.cs" />
     <Compile Include="Cache\ICacheKeyFactory.cs" />
     <Compile Include="Work\ImageTarget.cs" />
+    <Compile Include="Helpers\PlatformPerformance.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

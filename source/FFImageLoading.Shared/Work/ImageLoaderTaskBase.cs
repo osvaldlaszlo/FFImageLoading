@@ -5,7 +5,12 @@ using System.Threading.Tasks;
 using System.Linq;
 using FFImageLoading.Cache;
 using System.IO;
+
+#if SILVERLIGHT
+using FFImageLoading.Concurrency;
+#else
 using System.Collections.Concurrent;
+#endif
 
 namespace FFImageLoading.Work
 {
@@ -18,7 +23,6 @@ namespace FFImageLoading.Work
 		}
 
 		private bool _clearCacheOnOutOfMemory;
-		private string _streamKey;
 		private bool _isDisposed;
 
         private readonly bool _hasCustomCacheKey;
@@ -26,9 +30,12 @@ namespace FFImageLoading.Work
         private readonly Lazy<string> _downsamplingKey;
         private readonly ConcurrentDictionary<string, string> _keys;
         private readonly Lazy<string> _rawKey;
+        private readonly Lazy<string> _streamKey;
+        private readonly bool _verboseLoadingCancelledLogging;
 
-        protected ImageLoaderTaskBase(IMainThreadDispatcher mainThreadDispatcher, IMiniLogger miniLogger, TaskParameter parameters, bool clearCacheOnOutOfMemory)
+        protected ImageLoaderTaskBase(IMainThreadDispatcher mainThreadDispatcher, IMiniLogger miniLogger, TaskParameter parameters, bool clearCacheOnOutOfMemory, bool verboseLoadingCancelledLogging)
         {
+            _verboseLoadingCancelledLogging = verboseLoadingCancelledLogging;
             _clearCacheOnOutOfMemory = clearCacheOnOutOfMemory;
             CancellationToken = new CancellationTokenSource();
             Parameters = parameters;
@@ -57,9 +64,11 @@ namespace FFImageLoading.Work
             });
 
             _rawKey = new Lazy<string>(() => GetKeyInternal(null, true));
+
+            _streamKey = new Lazy<string>(() => "Stream" + GetNextStreamIndex());
         }
 
-		#region IDisposable implementation
+#region IDisposable implementation
 
 		public void Dispose()
 		{
@@ -79,7 +88,7 @@ namespace FFImageLoading.Work
 			}
         }
 
-		#endregion
+#endregion
 
 		public void Finish()
 		{
@@ -131,7 +140,7 @@ namespace FFImageLoading.Work
             }
             else
             {
-                return _keys.GetOrAdd(path ?? Parameters.Path, p => GetKeyInternal(p, false));
+                return _keys.GetOrAdd(path ?? "", p => GetKeyInternal(path, false));
             }
 		}
 
@@ -160,7 +169,9 @@ namespace FFImageLoading.Work
 				}
 			}
 			Finish();
-			Logger.Debug(string.Format("Canceled image generation for {0}", GetKey()));
+
+            if (_verboseLoadingCancelledLogging)
+			    Logger.Debug(string.Format("Canceled image generation for {0}", GetKey()));
 		}
 
 		public bool IsCancelled
@@ -299,25 +310,25 @@ namespace FFImageLoading.Work
 
         private string GetKeyInternal(string path, bool raw)
         {
+            string baseKey = null;
+
             if (_hasCustomCacheKey)
             {
+                baseKey = path ?? Parameters.CustomCacheKey;
+
                 if (!raw)
                 {
-                    return string.Concat(Parameters.CustomCacheKey + _transformationsKey.Value + _downsamplingKey.Value);
+                    return string.Concat(baseKey, _transformationsKey.Value, _downsamplingKey.Value);
                 }
                 else
                 {
-                    return Parameters.CustomCacheKey;
+                    return baseKey;
                 }
             }
 
-            string baseKey = null;
             if (Parameters.Stream != null)
             {
-                if (_streamKey == null)
-                    _streamKey = "Stream" + GetNextStreamIndex();
-
-                baseKey = _streamKey;
+                baseKey = _streamKey.Value;
             }
             else
             {
@@ -328,7 +339,7 @@ namespace FFImageLoading.Work
 
             if (!raw)
             {
-                return string.Concat(baseKey + _transformationsKey.Value + _downsamplingKey.Value);
+                return string.Concat(baseKey, _transformationsKey.Value, _downsamplingKey.Value);
             }
             else
             {

@@ -1,13 +1,19 @@
 ﻿using System;
 using Android.Graphics;
 using System.Linq;
+using Android.Runtime;
 
 namespace FFImageLoading.Transformations
 {
+	[Preserve(AllMembers = true)]
 	public class ColorSpaceTransformation : TransformationBase
 	{
 		ColorMatrix _colorMatrix;
 		float[][] _rgbawMatrix;
+
+		public ColorSpaceTransformation() : this(FFColorMatrix.InvertColorMatrix)
+		{
+		}
 
 		public ColorSpaceTransformation(float[][] rgbawMatrix)
 		{
@@ -15,13 +21,29 @@ namespace FFImageLoading.Transformations
 				throw new ArgumentException("Wrong size of RGBAW color matrix");
 
 			_colorMatrix = new ColorMatrix();
-			_rgbawMatrix = rgbawMatrix;
-			UpdateColorMatrix(rgbawMatrix);
+			RGBAWMatrix = rgbawMatrix;
 		}
 
 		public ColorSpaceTransformation(ColorMatrix colorMatrix)
 		{
 			_colorMatrix = colorMatrix;
+		}
+
+		public float[][] RGBAWMatrix
+		{
+			get
+			{
+				return _rgbawMatrix;
+			}
+
+			set
+			{
+				if (value.Length != 5 || value.Any(v => v.Length != 5))
+					throw new ArgumentException("Wrong size of RGBAW color matrix");
+
+				_rgbawMatrix = value;
+				UpdateColorMatrix(_rgbawMatrix);
+			}
 		}
 
 		public override string Key
@@ -73,10 +95,14 @@ namespace FFImageLoading.Transformations
 
 		public static Bitmap ToColorSpace(Bitmap source, ColorMatrix colorMatrix)
 		{
+			var config = source.GetConfig();
+            		if (config == null)
+                		config = Bitmap.Config.Argb8888;    // This will support transparency
+			
 			int width = source.Width;
 			int height = source.Height;
 
-			Bitmap bitmap = Bitmap.CreateBitmap(width, height, source.GetConfig());
+			Bitmap bitmap = Bitmap.CreateBitmap(width, height, config);
 
 			using (Canvas canvas = new Canvas(bitmap))
 			using (Paint paint = new Paint())

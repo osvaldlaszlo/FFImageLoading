@@ -5,7 +5,7 @@ using UIKit;
 
 namespace FFImageLoading.Work
 {
-	public class UIImageViewTarget: UIViewTarget<UIImageView>
+	public class UIImageViewTarget: UIControlTarget<UIImageView>
 	{
 		public UIImageViewTarget(UIImageView control) : base(control)
 		{
@@ -39,6 +39,15 @@ namespace FFImageLoading.Work
 				control.Image = image;
 			}
 		}
+
+        public override void SetAsEmpty()
+        {
+            var control = Control;
+            if (control == null)
+                return;
+
+            control.Image = null;
+        }
 	}
 }
 

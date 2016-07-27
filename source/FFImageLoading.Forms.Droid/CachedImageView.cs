@@ -6,8 +6,11 @@ using Android.Util;
 
 namespace FFImageLoading.Forms.Droid
 {
+	[Preserve(AllMembers = true)]
 	public class CachedImageView : ImageViewAsync
 	{
+		bool _skipInvalidate;
+
         public CachedImageView(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
         {
             SetWillNotDraw(false);
@@ -22,6 +25,22 @@ namespace FFImageLoading.Forms.Droid
         {
             SetWillNotDraw(false);
         }
+
+		public override void Invalidate()
+		{
+			if (_skipInvalidate)
+			{
+				_skipInvalidate = false;
+				return;
+			}
+
+			base.Invalidate();
+		}
+
+		public void SkipInvalidate()
+		{
+			_skipInvalidate = true;
+		}
 	}
 }
 

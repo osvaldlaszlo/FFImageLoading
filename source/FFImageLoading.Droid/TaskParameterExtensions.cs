@@ -20,7 +20,15 @@ namespace FFImageLoading
         public static IScheduledWork Into(this TaskParameter parameters, ImageViewAsync imageView)
         {
 			var target = new ImageViewTarget(imageView);
-			var task = CreateTask(parameters, target);
+
+            if (parameters.Source != ImageSource.Stream && string.IsNullOrWhiteSpace(parameters.Path))
+            {
+                target.SetAsEmpty();
+                parameters.Dispose();
+                return null;
+            }
+
+            var task = CreateTask(parameters, target);
             ImageService.Instance.LoadImage(task);
             return task;
         }
@@ -72,15 +80,20 @@ namespace FFImageLoading
 		/// <param name="parameters">Image parameters.</param>
 		public static void Preload(this TaskParameter parameters)
 		{
+            if (parameters.Priority == null)
+            {
+                parameters.WithPriority(LoadingPriority.Low);
+            }
+
 			parameters.Preload = true;
 			var target = new Target<BitmapDrawable, ImageLoaderTask>();
-			var task = CreateTask(parameters, target);
+            var task = CreateTask(parameters, target);
 			ImageService.Instance.LoadImage(task);
 		}
 
 		private static ImageLoaderTask CreateTask(this TaskParameter parameters, Target<BitmapDrawable, ImageLoaderTask> target)
 		{
-			return new ImageLoaderTask(ImageService.Instance.Config.DownloadCache, new MainThreadDispatcher(), ImageService.Instance.Config.Logger, parameters, target);
+			return new ImageLoaderTask(ImageService.Instance.Config.DownloadCache, MainThreadDispatcher.Instance, ImageService.Instance.Config.Logger, parameters, target);
 		}
     }
 }

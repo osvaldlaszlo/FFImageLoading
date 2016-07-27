@@ -66,7 +66,7 @@ namespace FFImageLoading.Cache
 		/// <param name="key">Key to store/retrieve the file.</param>
 		/// <param name="bytes">File data in bytes.</param>
 		/// <param name="duration">Specifies how long an item should remain in the cache.</param>
-		public async void AddToSavingQueueIfNotExists(string key, byte[] bytes, TimeSpan duration)
+		public async Task AddToSavingQueueIfNotExistsAsync(string key, byte[] bytes, TimeSpan duration)
 		{
 			var sanitizedKey = SanitizeKey(key);
 
@@ -93,10 +93,7 @@ namespace FFImageLoading.Cache
                         string filename = sanitizedKey + "." + duration.TotalSeconds;
                         string filepath = Path.Combine(_cachePath, filename);
 
-                        using (var fs = FileStore.GetOutputStream(filepath))
-                        {
-                            await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
-                        }
+                        await FileStore.WriteBytesAsync(filepath, bytes, CancellationToken.None).ConfigureAwait(false);
 
                         _entries[sanitizedKey] = new CacheEntry(DateTime.UtcNow, duration, filename);
                     }
@@ -209,7 +206,7 @@ namespace FFImageLoading.Cache
 					return null;
 
 				string filepath = Path.Combine(_cachePath, entry.FileName);
-				return FileStore.GetInputStream(filepath);
+				return FileStore.GetInputStream(filepath, false);
 			}
 			catch
 			{

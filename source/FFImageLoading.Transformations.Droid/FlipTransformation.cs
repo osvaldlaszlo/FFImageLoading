@@ -1,26 +1,28 @@
 ﻿using System;
 using Android.Graphics;
+using Android.Runtime;
 using Android.Util;
 
 namespace FFImageLoading.Transformations
 {
+	[Preserve(AllMembers = true)]
 	public class FlipTransformation: TransformationBase
 	{
-		private FlipType _flipType;
-
 		public FlipTransformation(FlipType flipType)
 		{
-			_flipType = flipType;
+			FlipType = flipType;
 		}
 
 		public override string Key
 		{
-			get { return string.Format("FlipTransformation,Type={0}", _flipType); }
+			get { return string.Format("FlipTransformation,Type={0}", FlipType); }
 		}
+
+		public FlipType FlipType { get; set; }
 
 		protected override Bitmap Transform(Bitmap source)
 		{
-			switch (_flipType)
+			switch (FlipType)
 			{
 				case FlipType.Vertical:
 					return Flip(source, 1, -1);

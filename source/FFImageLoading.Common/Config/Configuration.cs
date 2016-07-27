@@ -17,12 +17,16 @@ namespace FFImageLoading.Config
 			MaxMemoryCacheSize = 0; 
 			LoadWithTransparencyChannel = false;
 			FadeAnimationEnabled = true;
-			FadeAnimationForCachedImages = true;
+			FadeAnimationForCachedImages = false; // by default cached images will not fade when displayed on screen, otherwise it gives the impression that UI is laggy
 			FadeAnimationDuration = 500;
 			TransformPlaceholders = true;
 			DownsampleInterpolationMode = InterpolationMode.Default;
 			HttpHeadersTimeout = 15;
 			HttpReadTimeout = 30;
+            VerbosePerformanceLogging = false;
+            VerboseMemoryCacheLogging = false;
+            VerboseLoadingCancelledLogging = false;
+            VerboseLogging = false;
 		}
 
 		/// <summary>
@@ -114,6 +118,31 @@ namespace FFImageLoading.Config
 		/// Milliseconds to wait prior to start any task.
 		/// </summary>
 		public int DelayInMs { get; set; }
+
+        /// <summary>
+        /// Enables / disables verbose performance logging.
+        /// </summary>
+        /// <value>The verbose performance logging.</value>
+        public bool VerbosePerformanceLogging { get; set; }
+
+        /// <summary>
+        /// Enables / disables verbose memory cache logging.
+        /// </summary>
+        /// <value>The verbose memory cache logging.</value>
+        public bool VerboseMemoryCacheLogging { get; set; }
+
+        /// <summary>
+        /// Enables / disables verbose image loading cancelled logging.
+        /// </summary>
+        /// <value>The verbose image loading cancelled logging.</value>
+        public bool VerboseLoadingCancelledLogging { get; set; }
+
+        /// <summary>
+        /// Enables / disables  verbose logging. 
+        /// IMPORTANT! If it's disabled are other verbose logging options are disabled too
+        /// </summary>
+        /// <value>The verbose logging.</value>
+        public bool VerboseLogging { get; set; }
     }
 }
 

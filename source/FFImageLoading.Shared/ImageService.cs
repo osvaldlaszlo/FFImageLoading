@@ -30,56 +30,71 @@ namespace FFImageLoading
 		public static IImageService Instance { get { return LazyInstance.Value; } }
 
 		private ImageService() { }
-
+ 
         /// <summary>
         /// Gets FFImageLoading configuration
         /// </summary>
         /// <value>The configuration used by FFImageLoading.</value>
         public Configuration Config
-		{
-			get
-			{
-				InitializeIfNeeded();
-				return _config;
-			}
-			private set
-			{
-				_config = value;
-			}
-		}
+        {
+            get
+            {
+                InitializeIfNeeded();
+                return _config;
+            }
 
-		/// <summary>
-		/// Initializes FFImageLoading with given Configuration. It allows to configure and override most of it.
-		/// </summary>
-		/// <param name="configuration">Configuration.</param>
-		public void Initialize(Configuration configuration)
+            set
+            {
+                _config = value;
+            }
+        }
+
+        /// <summary>
+        /// Initializes FFImageLoading with a default Configuration. 
+        /// Also forces to run disk cache cleaning routines (avoiding delay for first image loading tasks)
+        /// </summary>
+        /// <param name="configuration">Configuration.</param>
+        public void Initialize()
+        {
+            lock (_initializeLock)
+            {
+                _initialized = false;
+                InitializeIfNeeded();
+            }
+        }
+
+        /// <summary>
+        /// Initializes FFImageLoading with a given Configuration. It allows to configure and override most of it.
+        /// Also forces to run disk cache cleaning routines (avoiding delay for first image loading tasks)
+        /// </summary>
+        /// <param name="configuration">Configuration.</param>
+        public void Initialize(Configuration configuration)
 		{
 			lock (_initializeLock)
 			{
 				_initialized = false;
 
-				if (Config != null)
+				if (_config != null)
 				{
 					// If DownloadCache is not updated but HttpClient is then we inform DownloadCache
 					if (configuration.HttpClient != null && configuration.DownloadCache == null)
 					{
-						configuration.DownloadCache = Config.DownloadCache;
+						configuration.DownloadCache = _config.DownloadCache;
 						configuration.DownloadCache.DownloadHttpClient = configuration.HttpClient;
 					}
 
 					// Redefine these if they were provided only
-					configuration.HttpClient = configuration.HttpClient ?? Config.HttpClient;
-					configuration.Scheduler = configuration.Scheduler ?? Config.Scheduler;
-					configuration.Logger = configuration.Logger ?? Config.Logger;
-					configuration.DownloadCache = configuration.DownloadCache ?? Config.DownloadCache;
+					configuration.HttpClient = configuration.HttpClient ?? _config.HttpClient;
+					configuration.Scheduler = configuration.Scheduler ?? _config.Scheduler;
+					configuration.Logger = configuration.Logger ?? _config.Logger;
+					configuration.DownloadCache = configuration.DownloadCache ?? _config.DownloadCache;
 
 					// Skip configuration for maxMemoryCacheSize and diskCache. They cannot be redefined.
 					if (configuration.Logger != null)
 						configuration.Logger.Debug("Skip configuration for maxMemoryCacheSize and diskCache. They cannot be redefined.");
-					configuration.MaxMemoryCacheSize = Config.MaxMemoryCacheSize;
-					configuration.DiskCache = Config.DiskCache;
+					configuration.MaxMemoryCacheSize = _config.MaxMemoryCacheSize;
+					configuration.DiskCache = _config.DiskCache;
 				}
-
 
 				InitializeIfNeeded(configuration);
 			}
@@ -105,8 +120,8 @@ namespace FFImageLoading
 					httpClient.Timeout = TimeSpan.FromSeconds(userDefinedConfig.HttpReadTimeout);
 				}
 
-				var logger = userDefinedConfig.Logger ?? new MiniLogger();
-				var scheduler = userDefinedConfig.Scheduler ?? new WorkScheduler(logger);
+                var logger = new MiniLoggerWrapper(userDefinedConfig.Logger ?? new MiniLogger(), userDefinedConfig.VerboseLogging);
+                var scheduler = userDefinedConfig.Scheduler ?? new WorkScheduler(logger, userDefinedConfig.VerbosePerformanceLogging, new PlatformPerformance());
 				var diskCache = userDefinedConfig.DiskCache ?? SimpleDiskCache.CreateCache("FFSimpleDiskCache");
 				var downloadCache = userDefinedConfig.DownloadCache ?? new DownloadCache(httpClient, diskCache);
 
@@ -314,5 +329,22 @@ namespace FFImageLoading
 				await Config.DiskCache.RemoveAsync(hash).ConfigureAwait(false);
 			}
 		}
+
+        /// <summary>
+        /// Cancels tasks that match predicate.
+        /// </summary>
+        /// <param name="predicate">Predicate for finding relevant tasks to cancel.</param>        public void Cancel(Func<IImageLoaderTask, bool> predicate)
+        {
+            Scheduler.Cancel(predicate);
+        }
+
+        /// <summary>
+        /// Cancels tasks that match predicate.
+        /// </summary>
+        /// <param name="predicate">Predicate for finding relevant tasks to cancel.</param>
+        public void Cancel(Func<TaskParameter, bool> predicate)
+        {
+            Scheduler.Cancel(task => task.Parameters != null && predicate(task.Parameters));
+        }
     }
 }
